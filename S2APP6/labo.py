@@ -112,32 +112,43 @@ def probleme1():
     
     ##FT1
     #Entrez les poles, les zeros et le gain de la FT #1
-    z1 = [1]
-    p1 = [1]
+    z1 = [3]
+    p1 = [-3]
     k1 = 1
-    
+    num1 = [1, -3]
+    denum1 = [1, 3]
     #Ajouter le code pour obtenir la représentation de la fonction de transfert sous forme de polynome. Indice: Regarder la fonction scipy.signal.zpk2tf
-    
-    
+
+
     #Ajouter le code pour generer la carte des poles et zeros et le lieu de Bode
     #utiliser les fonctions dans helpers.py
-    
-    
+    hp.pzmap1(z1 ,p1 ,"Va chier")
+    # hp.bodeplot(num1, denum1,"VA CHIER")
+    poly1 = signal.zpk2tf(z1, p1, k1)
+    w1, mag1, phase1 = signal.bode(poly1)
+    hp.bode1(w1, mag1, phase1,"VA CHIER")
     
     ##FT2
     #Entrez les poles, les zeros et le gain de la FT #2
-    z2 = [1+1j, 1-1j]
-    p2 = [-1+1j, -1-1j]
+    z2 = [3+5j, 3-5j]
+    p2 = [-3+5j, -3-5j]
     k2 = 1
+    num2 = [1,-6, 34]
+    denum2 = [1, 6, 34]
     
     #Ajouter le code pour obtenir la représentation de la fonction de transfert sous forme de polynome
-    
+    hp.pzmap1(z2, p2, "Va chier2")
+    # hp.bodeplot(num2, denum2, "VA CHIER2")
+    poly2 = signal.zpk2tf(z2, p2, k2)
+    w2, mag2, phase2 = signal.bode(poly2)
+    hp.bode1(w2, mag2, phase2,"VA CHIER2")
     
     #Ajouter le code pour generer la carte des poles et zeros et le lieu de Bode
     #utiliser les fonctions dans helpers.py
-    
-    
-    
+
+
+    tupleZPK1 = (poly1[0], poly1[1])
+    tupleZPK2 = (poly2[0], poly2[1])
     #Question B
     
     #Analysez bien les lignes suivantes pour comprendre leur fonctionnement
@@ -157,11 +168,11 @@ def probleme1():
         #Commentez la ligne ci-dessous et decommentez les lignes commentees de la boucle for en completant les argument des appels a lsim
         temp = [t,u[i]] 
         
-        #temp = signal.lsim(...)  # temp = [t, y, x], voir l'aide de lsim
+        temp = signal.lsim(tupleZPK1,u[i],t)  # temp = [t, y, x], voir l'aide de lsim
         tout.append(temp[0])
         yout1.append(temp[1])
         
-        #temp = signal.lsim(...)  # répète pour l'autre FT
+        temp = signal.lsim(tupleZPK2,u[i],t)  # répète pour l'autre FT
         yout2.append(temp[1])
         
     #Affichage des simulations
@@ -172,10 +183,39 @@ def probleme1():
     #Comment mettre les filtres en serie/parrallele? Reflechisser a deux approches possibles, l'une utilisant lsim et l'autre utilisant les fonctions paratf et seriestf de la librairie helper
     #Ensuite, vous pouvez utiliser le meme genre de boucle que ci-dessous pour generer les reponses aux differentes frequences
 
+    z3, p3, k3 = hp.paratf(z1, p1, k1, z2, p2, k2)
+    z4, p4, k4 = hp.seriestf(z1, p1, k1, z2, p2, k2)
+    tupleZPK3 = (z3, p3,k3)
+    tupleZPK4 = (z4, p4, k4)
+    tout_2 = []
+    yout1_2 = []
+    yout2_2 = []
+    for i in range(len(w)):
+        # Commentez la ligne ci-dessous et decommentez les lignes commentees de la boucle for en completant les argument des appels a lsim
+        temp_2 = [t, u[i]]
 
+        temp_2 = signal.lsim(tupleZPK3, u[i], t)  # temp = [t, y, x], voir l'aide de lsim
+        tout_2.append(temp_2[0])
+        yout1_2.append(temp_2[1])
+
+        temp_2 = signal.lsim(tupleZPK4, u[i], t)  # répète pour l'autre FT
+        yout2_2.append(temp_2[1])
+    hp.timepltmulti1(t, u, w, tout_2, yout1_2, 'H1+H2')
+    hp.timepltmulti1(t, u, w, tout_2, yout2_2, 'H1*H2')
     #Question D
     #Inspirez-vous de la question a pour afficher la carte des poles et zeros et le lieu de Bode de ces filtres, afficher aussi le delais de groupe en utilisant hp.grpdel1 en vous inspirant de la fonction exempleButterworth
-
+    # ---------------H1+H2-------------------- #
+    hp.pzmap1(z3, p3, "Va pas chier")
+    # hp.bodeplot(num1, denum1,"VA CHIER")
+    poly3 = signal.zpk2tf(z3, p3, k3)
+    w3, mag3, phase3 = signal.bode(poly3)
+    hp.bodeplot(poly3[0], poly3[1],"VA CHIER")
+    # ---------------H1*H2-------------------- #
+    hp.pzmap1(z4, p4, "Va pas chier2")
+    # hp.bodeplot(num2, denum2, "VA CHIER2")
+    poly4 = signal.zpk2tf(z4, p4, k4)
+    w4, mag4, phase4 = signal.bode(poly4)
+    hp.bode1(w4, mag4, phase4, "VA PAS CHIER2")
 ###############################################################################
 def probleme2():
     """
@@ -187,27 +227,47 @@ def probleme2():
     #Question A
     
     #Frequence de coupure des filtres, a ajuster
-    wc = 2 * np.pi * 1      # fréquence de coupure rad/s
-    
+    wc = 2 * np.pi * 5000      # fréquence de coupure rad/s
+
     #Generez les filtres butterworth avec la fonction signal.butter, sous quel forme est la sortie (polynome ou pole-zero-gain)?
     #Transformer la sortie de signal.butter dans l'autre representation (vous pouvez vous inspirer de la question A du probleme 1)
 
-
+    # z1, p1, k1 = signal.butter(2, wc, btype='lowpass', analog=True)
+    b1, a1 = signal.butter(2, wc, btype='lowpass', analog=True)
+    # z2, p2, k2 = signal.butter(2, wc, btype='highpass', analog=True)
+    b2, a2 = signal.butter(2, wc, btype='highpass', analog=True)
     #Affichage des polynomes
-    #print(f'Passe-bas Numérateur {b1}, Dénominateur {a1}')  # affiche les coefficients correspondants au filtre
-    #print(f'Passe-haut Numérateur {b2}, Dénominateur {a2}')  # affiche les coefficients correspondants au filtre
-
+    print(f'Passe-bas Numérateur {b1}, Dénominateur {a1}')  # affiche les coefficients correspondants au filtre
+    print(f'Passe-haut Numérateur {b2}, Dénominateur {a2}')  # affiche les coefficients correspondants au filtre
+    z1, p1, k1 = signal.tf2zpk(b1, a1)
+    z2, p2, k2 = signal.tf2zpk(b2, a2)
 
     #Questions B et C
 
     #Génère une onde carrée, ajuster la frequence
-    fsquare = 1  # Hz
+    fsquare = 1000  # Hz
     t, step = np.linspace(0, .01, 5000, retstep=True)
     u1 = signal.square(2 * np.pi * fsquare * t, 0.5)
 
     #Gain de chacune des bandes, ajuster au besoin
+    # lowk = k1
+    # highk = k2
     lowk = 1
     highk = 1
+
+    # w = [0, 1, 4, 15, 50]  # valeurs des fréquences désirées, rad/s
+    # génère une constante si w = 0 sinon un sinus
+
+    z3, p3, k3 = hp.paratf(z1, p1, k1*lowk, z2, p2, k2*highk)
+    tupleZPK3 = (z3, p3, k3)
+    # exemple réponse temporelle pour plusieurs entrées sinusoidales définies ci-dessus
+    # initialise les listes qui vont contenir l'information retournée par lsim
+    tout, yout1, xout1 = signal.lsim((z1, p1, k1), u1, t)
+    tout, yout2, xout2 = signal.lsim((z2, p2, k2), u1, t)
+    tout, yout3, xout3 = signal.lsim(tupleZPK3, u1, t)
+
+    hp.timepltmulti2(t, u1,tout,[yout1,yout2,yout3],"Cawliss,",['H1', 'H2', 'HÉgalisateur'])
+    # itère sur les fréquences désirées
 
     #En vous inspirant de la question C du probleme 1, mettre ces deux filtres en parallele, afficher le lieu de bode et le délai de groupe
 
@@ -221,8 +281,18 @@ def probleme2():
     u2 = np.sin(2*np.pi*fsin*t)
 
     # redéfinit les gains de bande
-    lowk = .1
+    lowk = 0.1
     highk = 1
+    tout, yout4, xout4 = signal.lsim((z1, p1, k1), u2, t)
+    yout4 = yout4*lowk
+    tout, yout5, xout5 = signal.lsim((z2, p2, k2), u2, t)
+    yout5 = yout5 * highk
+
+
+    z4, p4, k4 = hp.paratf(z1, p1, k1 * lowk, z2, p2, k2 * highk)
+    tupleZPK4 = (z4, p4, k4)
+    tout, yout6, xout6 = signal.lsim(tupleZPK4, u2, t)
+    hp.timepltmulti2(t, u2, tout, [yout4, yout5, yout6], "TABERNAK", ['H1', 'H2', 'HÉgalisateur'])
 
     #Simuler la sortie de chacun des filtres (passe-haut, passe-bas et les deux en parallele) avec la fonction lsim et l'entre u2
     
@@ -237,7 +307,7 @@ def main():
     # exampleBode()
     # exampleButterworth()
     probleme1()
-    #probleme2()
+    probleme2()
     plt.show()
 
 
