@@ -122,11 +122,11 @@ def probleme1():
 
     #Ajouter le code pour generer la carte des poles et zeros et le lieu de Bode
     #utiliser les fonctions dans helpers.py
-    hp.pzmap1(z1 ,p1 ,"Va chier")
+    hp.pzmap1(z1 ,p1 ,"de H1")
     # hp.bodeplot(num1, denum1,"VA CHIER")
-    poly1 = signal.zpk2tf(z1, p1, k1)
-    w1, mag1, phase1 = signal.bode(poly1)
-    hp.bode1(w1, mag1, phase1,"VA CHIER")
+    poly1 = signal.zpk2tf(z1, p1, k1) # on obtient le polynome de la fonction de transfert harmonique H(s) sous forme de liste (a l'index 0, on a le num et a l'index 1 le denum)
+    w1, mag1, phase1 = signal.bode(poly1) # on obtient la fréquence (rad/s), le gain (dB) et la phase (deg)
+    hp.bode1(w1, mag1, phase1,"H1")
     
     ##FT2
     #Entrez les poles, les zeros et le gain de la FT #2
@@ -137,18 +137,18 @@ def probleme1():
     denum2 = [1, 6, 34]
     
     #Ajouter le code pour obtenir la représentation de la fonction de transfert sous forme de polynome
-    hp.pzmap1(z2, p2, "Va chier2")
+    hp.pzmap1(z2, p2, "H2")
     # hp.bodeplot(num2, denum2, "VA CHIER2")
     poly2 = signal.zpk2tf(z2, p2, k2)
     w2, mag2, phase2 = signal.bode(poly2)
-    hp.bode1(w2, mag2, phase2,"VA CHIER2")
+    hp.bode1(w2, mag2, phase2,"H2")
     
     #Ajouter le code pour generer la carte des poles et zeros et le lieu de Bode
     #utiliser les fonctions dans helpers.py
 
 
-    tupleZPK1 = (poly1[0], poly1[1])
-    tupleZPK2 = (poly2[0], poly2[1])
+    tupleND1 = (poly1[0], poly1[1]) # tuple avec num, dénum
+    tupleND2 = (poly2[0], poly2[1])
     #Question B
     
     #Analysez bien les lignes suivantes pour comprendre leur fonctionnement
@@ -156,7 +156,9 @@ def probleme1():
     t = np.linspace(0, 10, 5000)  # 5000 points de 0 à 10s
     w = [0, 1, 4, 15, 50]   # valeurs des fréquences désirées, rad/s
     # génère une constante si w = 0 sinon un sinus
-    u = [np.ones_like(t) if w[i] == 0 else np.sin(w[i] * t) for i in range(len(w))]
+    # np.ones_like génère un tableau de même forme et longeur que t rempli de 1
+    # si w[i]==0, on met 1 dans le tableau, sinon on met np.sin(w[i] * t) dans le tableau
+    u = [np.ones_like(t) if w[i] == 0 else np.sin(w[i] * t) for i in range(len(w))] # liste
 
     # exemple réponse temporelle pour plusieurs entrées sinusoidales définies ci-dessus
     # initialise les listes qui vont contenir l'information retournée par lsim
@@ -168,11 +170,11 @@ def probleme1():
         #Commentez la ligne ci-dessous et decommentez les lignes commentees de la boucle for en completant les argument des appels a lsim
         temp = [t,u[i]] 
         
-        temp = signal.lsim(tupleZPK1,u[i],t)  # temp = [t, y, x], voir l'aide de lsim
+        temp = signal.lsim(tupleND1,u[i],t)  # temp = [t, y, x], voir l'aide de lsim
         tout.append(temp[0])
         yout1.append(temp[1])
         
-        temp = signal.lsim(tupleZPK2,u[i],t)  # répète pour l'autre FT
+        temp = signal.lsim(tupleND2,u[i],t)  # répète pour l'autre FT
         yout2.append(temp[1])
         
     #Affichage des simulations
@@ -205,17 +207,23 @@ def probleme1():
     #Question D
     #Inspirez-vous de la question a pour afficher la carte des poles et zeros et le lieu de Bode de ces filtres, afficher aussi le delais de groupe en utilisant hp.grpdel1 en vous inspirant de la fonction exempleButterworth
     # ---------------H1+H2-------------------- #
-    hp.pzmap1(z3, p3, "Va pas chier")
+    hp.pzmap1(z3, p3, "H1+H2")
     # hp.bodeplot(num1, denum1,"VA CHIER")
     poly3 = signal.zpk2tf(z3, p3, k3)
     w3, mag3, phase3 = signal.bode(poly3)
-    hp.bodeplot(poly3[0], poly3[1],"VA CHIER")
+    mag3, ph3, w3, fig1, ax1 = hp.bodeplot(poly3[0], poly3[1],"H1+H2")
     # ---------------H1*H2-------------------- #
-    hp.pzmap1(z4, p4, "Va pas chier2")
+    hp.pzmap1(z4, p4, "H1*H2")
     # hp.bodeplot(num2, denum2, "VA CHIER2")
     poly4 = signal.zpk2tf(z4, p4, k4)
     w4, mag4, phase4 = signal.bode(poly4)
-    hp.bode1(w4, mag4, phase4, "VA PAS CHIER2")
+    mag4, ph4, w4, fig2, ax2 = hp.bodeplot(poly4[0],poly4[1], "H1*H2")
+    # -------------Délais de groupe---------------#
+    delay1 = - np.diff(ph3) / np.diff(w3)
+    hp.grpdel1(w3, delay1, 'H1+H2')
+    delay2 = - np.diff(ph4) / np.diff(w4)
+    hp.grpdel1(w4, delay2, 'H1*H2')
+
 ###############################################################################
 def probleme2():
     """
@@ -266,7 +274,7 @@ def probleme2():
     tout, yout2, xout2 = signal.lsim((z2, p2, k2), u1, t)
     tout, yout3, xout3 = signal.lsim(tupleZPK3, u1, t)
 
-    hp.timepltmulti2(t, u1,tout,[yout1,yout2,yout3],"Cawliss,",['H1', 'H2', 'HÉgalisateur'])
+    hp.timepltmulti2(t, u1,tout,[yout1,yout2,yout3],"Égaliseur lowk = 1, highk = 1",['H1', 'H2', 'HÉgalisateur'])
     # itère sur les fréquences désirées
 
     #En vous inspirant de la question C du probleme 1, mettre ces deux filtres en parallele, afficher le lieu de bode et le délai de groupe
@@ -292,13 +300,18 @@ def probleme2():
     z4, p4, k4 = hp.paratf(z1, p1, k1 * lowk, z2, p2, k2 * highk)
     tupleZPK4 = (z4, p4, k4)
     tout, yout6, xout6 = signal.lsim(tupleZPK4, u2, t)
-    hp.timepltmulti2(t, u2, tout, [yout4, yout5, yout6], "TABERNAK", ['H1', 'H2', 'HÉgalisateur'])
+    hp.timepltmulti2(t, u2, tout, [yout4, yout5, yout6], "Égaliseur lowk = 0.1, high = 1", ['H1', 'H2', 'HÉgalisateur'])
 
     #Simuler la sortie de chacun des filtres (passe-haut, passe-bas et les deux en parallele) avec la fonction lsim et l'entre u2
     
     #Question E
     #Inspirer vous du probleme 1 pour afficher le lieu de bode et le delais de groupe des filtres conçus
-    
+    # hp.bodeplot(num1, denum1,"VA CHIER")
+    poly4 = signal.zpk2tf(z3, p3, k3)
+    w3, mag3, phase3 = signal.bode(poly4)
+    mag4, ph4, w4, fig, ax = hp.bodeplot(poly4[0], poly4[1], "lowk = 1, highk=1")
+    delay = - np.diff(ph4) / np.diff(w4)
+    hp.grpdel1(w4, delay, "lowk = 1, highk=1")
     
 ###############################################################################
 def main():
