@@ -122,11 +122,11 @@ def probleme1():
 
     #Ajouter le code pour generer la carte des poles et zeros et le lieu de Bode
     #utiliser les fonctions dans helpers.py
-    hp.pzmap1(z1 ,p1 ,"de H1")
+    hp.pzmap1(z1 ,p1 ,"de H1") # permet d'afficher les poles et les zéros
     # hp.bodeplot(num1, denum1,"VA CHIER")
     poly1 = signal.zpk2tf(z1, p1, k1) # on obtient le polynome de la fonction de transfert harmonique H(s) sous forme de liste (a l'index 0, on a le num et a l'index 1 le denum)
     w1, mag1, phase1 = signal.bode(poly1) # on obtient la fréquence (rad/s), le gain (dB) et la phase (deg)
-    hp.bode1(w1, mag1, phase1,"H1")
+    hp.bode1(w1, mag1, phase1,"H1") # on affiche les lieux de bodes (amplitude dB en fonction de la frequence rad/s et phase deg en fonction de la frequence rad/s)
     
     ##FT2
     #Entrez les poles, les zeros et le gain de la FT #2
@@ -162,7 +162,7 @@ def probleme1():
 
     # exemple réponse temporelle pour plusieurs entrées sinusoidales définies ci-dessus
     # initialise les listes qui vont contenir l'information retournée par lsim
-    tout = []
+    tout = [] # temps out
     yout1 = []
     yout2 = []
     # itère sur les fréquences désirées
@@ -178,7 +178,7 @@ def probleme1():
         yout2.append(temp[1])
         
     #Affichage des simulations
-    hp.timepltmulti1(t, u, w, tout, yout1, 'H1')
+    hp.timepltmulti1(t, u, w, tout, yout1, 'H1') # affichage des réponses temporel
     hp.timepltmulti1(t, u, w, tout, yout2, 'H2')
 
     #Question C 
@@ -211,13 +211,13 @@ def probleme1():
     # hp.bodeplot(num1, denum1,"VA CHIER")
     poly3 = signal.zpk2tf(z3, p3, k3)
     w3, mag3, phase3 = signal.bode(poly3)
-    mag3, ph3, w3, fig1, ax1 = hp.bodeplot(poly3[0], poly3[1],"H1+H2")
+    mag3, ph3, w3, _, _ = hp.bodeplot(poly3[0], poly3[1],"H1+H2")
     # ---------------H1*H2-------------------- #
     hp.pzmap1(z4, p4, "H1*H2")
     # hp.bodeplot(num2, denum2, "VA CHIER2")
     poly4 = signal.zpk2tf(z4, p4, k4)
     w4, mag4, phase4 = signal.bode(poly4)
-    mag4, ph4, w4, fig2, ax2 = hp.bodeplot(poly4[0],poly4[1], "H1*H2")
+    mag4, ph4, w4, _, _ = hp.bodeplot(poly4[0],poly4[1], "H1*H2")
     # -------------Délais de groupe---------------#
     delay1 = - np.diff(ph3) / np.diff(w3)
     hp.grpdel1(w3, delay1, 'H1+H2')
@@ -309,7 +309,7 @@ def probleme2():
     # hp.bodeplot(num1, denum1,"VA CHIER")
     poly4 = signal.zpk2tf(z3, p3, k3)
     w3, mag3, phase3 = signal.bode(poly4)
-    mag4, ph4, w4, fig, ax = hp.bodeplot(poly4[0], poly4[1], "lowk = 1, highk=1")
+    mag4, ph4, w4, _, _ = hp.bodeplot(poly4[0], poly4[1], "lowk = 1, highk=1")
     delay = - np.diff(ph4) / np.diff(w4)
     hp.grpdel1(w4, delay, "lowk = 1, highk=1")
     
@@ -320,7 +320,7 @@ def main():
     # exampleBode()
     # exampleButterworth()
     probleme1()
-    probleme2()
+    # probleme2()
     plt.show()
 
 
